@@ -48,6 +48,12 @@ async function loginUser(data) {
     if (!user) {
       throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
     }
+    if (!user.isVerified) {
+      throw new AppError(
+        "Please verify your email before logging in",
+        StatusCodes.FORBIDDEN
+      );
+    }
     const isMatch = await bcrypt.compare(data.password, user.password);
     if (!isMatch) {
       throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
@@ -58,13 +64,17 @@ async function loginUser(data) {
       email: user.email,
     };
     const userToken = AuthMiddlewares.generateToken(payload);
-    user.lastLogin = new Date();
+    await userRepository.update(user.id, {
+      lastLogin: new Date(),
+    });
+
     const { password, ...others } = user;
     return {
       ...others,
       userToken,
     };
   } catch (error) {
+    console.log(error);
     if (error instanceof AppError) {
       throw error;
     }

@@ -1,15 +1,20 @@
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const { ServerConfig } = require("../config");
+const { ErrorResponse } = require("../utils/common");
+const { AppError } = require("../utils");
+const { StatusCodes } = require("http-status-codes");
 
 const verifyToken = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (!authorization) {
-    return res.status(401).json({ status: false, message: "Token not found" });
+    throw new AppError("Token not found", StatusCodes.UNAUTHORIZED);
+    // return res.status(401).json({ status: false, message: "Token not found" });
   }
   const token = authorization.split(" ")[1];
   if (!token) {
-    return res.status(401).json({ status: false, message: "Access Denied ❌" });
+    throw new AppError("Access Denied ❌", StatusCodes.UNAUTHORIZED);
+    // return res.status(401).json({ status: false, message: "" });
   }
   try {
     const decoded = jwt.verify(token, ServerConfig.PUBLIC_KEY, {
@@ -18,7 +23,8 @@ const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ status: false, message: "Invalid token" });
+    // return res.status(401).json({ status: false, message: "Invalid token" });
+    throw new AppError("Invalid token", StatusCodes.UNAUTHORIZED);
   }
 };
 
@@ -34,9 +40,10 @@ const verifyAdmin = (req, res, next) => {
     if (req.user.role === "ADMIN") {
       next();
     } else {
-      return res
-        .status(401)
-        .json({ status: false, message: "Access Denied ❌" });
+      throw new AppError("Access Denied ❌", StatusCodes.UNAUTHORIZED);
+      // return res
+      //   .status(401)
+      //   .json({ status: false, message: "Access Denied ❌" });
     }
   });
 };
@@ -46,9 +53,10 @@ const verifyAndAuthorize = (req, res, next) => {
     if (req.user.role === "ADMIN" || req.user.role === "USER") {
       next();
     } else {
-      return res
-        .status(401)
-        .json({ status: false, message: "Access Denied ❌" });
+      throw new AppError("Access Denied ❌", StatusCodes.UNAUTHORIZED);
+      // return res
+      //   .status(401)
+      //   .json({ status: false, message: "Access Denied ❌" });
     }
   });
 };
