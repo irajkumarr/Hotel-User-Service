@@ -1,5 +1,7 @@
 const CrudRepository = require("./crud-repository");
 const { prisma } = require("../config");
+const { AppError } = require("../utils");
+const { StatusCodes } = require("http-status-codes");
 
 class UserRepository extends CrudRepository {
   constructor() {
@@ -12,10 +14,10 @@ class UserRepository extends CrudRepository {
         email: email,
       },
     });
-    if (!response) {
+    if (response) {
       throw new AppError(
-        "Not able to find the resource",
-        StatusCodes.NOT_FOUND
+        "User already exists with this email",
+        StatusCodes.CONFLICT
       );
     }
     return response;
