@@ -2,6 +2,16 @@ const { StatusCodes } = require("http-status-codes");
 const { asyncHandler } = require("../middlewares");
 const { AuthService } = require("../services");
 const { SuccessResponse } = require("../utils/common");
+
+/**
+ * POST : /
+ * req-body {
+ * email: "raj@gmail.com",
+ * password: Raj1234,
+ * firstName:"Raj",
+ * lastName:"Kumar",
+ * phoneNumber:"9812343234"}
+ */
 const createUser = asyncHandler(async (req, res) => {
   const {
     email,
