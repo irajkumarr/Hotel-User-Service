@@ -57,23 +57,29 @@ function validateCreateRequest(req, res, next) {
   next();
 }
 
-const airplaneUpdateSchema = Joi.object({
-  capacity: Joi.number().positive().max(1000).messages({
-    "number.base": "Capacity must be a number",
-    "number.max": "Capacity cannot exceed 1000",
-    "number.positive": "Capacity must be greater than 0",
+const userLoginSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Email must be valid",
+    "string.empty": "Email cannot be empty",
+  }),
+  password: Joi.string().min(6).max(60).required().messages({
+    "string.base": "Password must be a string",
+    "string.empty": "Password cannot be empty",
+    "string.min": "Password must be at least 6 characters long",
+    "string.max": "Password cannot exceed 60 characters",
+    "any.required": "Password is required",
   }),
 });
 // Middleware
-function validateUpdateRequest(req, res, next) {
-  const { error, value } = airplaneUpdateSchema.validate(req.body, {
+function validateLoginRequest(req, res, next) {
+  const { error, value } = userLoginSchema.validate(req.body, {
     abortEarly: false,
-    convert: false,
   });
 
   if (error) {
     const errors = error.details.map((detail) => FormatMessage(detail.message));
-    ErrorResponse.message = "Something went wrong while updating airplane";
+    ErrorResponse.message = "Something went wrong while logging user";
     ErrorResponse.error = new AppError(errors, StatusCodes.BAD_REQUEST);
     return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
   }
@@ -84,5 +90,5 @@ function validateUpdateRequest(req, res, next) {
 
 module.exports = {
   validateCreateRequest,
-  validateUpdateRequest,
+  validateLoginRequest,
 };

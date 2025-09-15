@@ -14,7 +14,7 @@ router.post(
 // api/v1/auth/login  POST
 router.post(
   "/login",
-  // UserMiddlewares.validateCreateRequest,
+  UserMiddlewares.validateLoginRequest,
   AuthController.loginUser
 );
 
