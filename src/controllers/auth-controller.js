@@ -36,6 +36,24 @@ const createUser = asyncHandler(async (req, res) => {
   return res.status(StatusCodes.CREATED).json(SuccessResponse);
 });
 
+/**
+ * POST : /
+ * req-body {
+ * email: "raj@gmail.com",
+ * password: Raj1234}
+ */
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await AuthService.loginUser({
+    email,
+    password,
+  });
+
+  SuccessResponse.data = user;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
 module.exports = {
   createUser,
+  loginUser,
 };

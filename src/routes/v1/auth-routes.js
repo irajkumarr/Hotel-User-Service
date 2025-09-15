@@ -11,4 +11,11 @@ router.post(
   AuthController.createUser
 );
 
+// api/v1/auth/login  POST
+router.post(
+  "/login",
+  // UserMiddlewares.validateCreateRequest,
+  AuthController.loginUser
+);
+
 module.exports = router;

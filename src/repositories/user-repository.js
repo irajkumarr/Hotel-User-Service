@@ -14,12 +14,6 @@ class UserRepository extends CrudRepository {
         email: email,
       },
     });
-    if (response) {
-      throw new AppError(
-        "User already exists with this email",
-        StatusCodes.CONFLICT
-      );
-    }
     return response;
   }
 }

@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const { UserRepository } = require("../repositories");
 const { AppError } = require("../utils");
 const bcrypt = require("bcryptjs");
+const { AuthMiddlewares } = require("../middlewares");
 
 const userRepository = new UserRepository();
 
@@ -41,6 +42,40 @@ async function createUser(data) {
   }
 }
 
+async function loginUser(data) {
+  try {
+    const user = await userRepository.getByEmail(data.email);
+    if (!user) {
+      throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
+    }
+    const isMatch = await bcrypt.compare(data.password, user.password);
+    if (!isMatch) {
+      throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
+    }
+    const payload = {
+      id: user.id,
+      role: user.role,
+      email: user.email,
+    };
+    const userToken = AuthMiddlewares.generateToken(payload);
+    user.lastLogin = new Date();
+    const { password, ...others } = user;
+    return {
+      ...others,
+      userToken,
+    };
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(
+      "Something went wrong while logging user",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 module.exports = {
   createUser,
+  loginUser,
 };
