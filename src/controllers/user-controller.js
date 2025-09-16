@@ -30,7 +30,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
 /**
  * POST : /
- * req-body {firstName:"John",lastName:"Doe"}
+ * req-body {}
  */
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await UserService.deleteUser(req.user.id);

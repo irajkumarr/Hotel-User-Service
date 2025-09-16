@@ -26,7 +26,8 @@ async function getUser(id) {
 async function updateUser(id, data) {
   try {
     const user = await userRepository.update(Number(id), data);
-    return user;
+    const { password, ...others } = user;
+    return others;
   } catch (error) {
     if (error.name === "PrismaClientKnownRequestError") {
       throw new AppError(
@@ -44,7 +45,8 @@ async function updateUser(id, data) {
 async function deleteUser(id) {
   try {
     const user = await userRepository.delete(Number(id));
-    return user;
+    const { password, ...others } = user;
+    return others;
   } catch (error) {
     if (error.name === "PrismaClientKnownRequestError") {
       throw new AppError(
@@ -59,8 +61,19 @@ async function deleteUser(id) {
   }
 }
 
+async function updateProfileImage() {
+  try {
+  } catch (error) {
+    throw new AppError(
+      "Something went wrong while updating user profile",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  updateProfileImage,
 };
