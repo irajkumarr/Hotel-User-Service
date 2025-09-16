@@ -13,6 +13,23 @@ const getUser = asyncHandler(async (req, res) => {
   return res.status(StatusCodes.OK).json(SuccessResponse);
 });
 
+/**
+ * POST : /
+ * req-body {firstName:"John",lastName:"Doe"}
+ */
+const updateUser = asyncHandler(async (req, res) => {
+  console
+  const { firstName, lastName, phoneNumber } = req.body;
+  const user = await UserService.updateUser(req.user.id, {
+    firstName,
+    lastName,
+    phoneNumber,
+  });
+  SuccessResponse.data = user;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
 module.exports = {
   getUser,
+  updateUser,
 };
