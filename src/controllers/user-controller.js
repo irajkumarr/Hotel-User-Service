@@ -38,8 +38,22 @@ const deleteUser = asyncHandler(async (req, res) => {
   return res.status(StatusCodes.OK).json(SuccessResponse);
 });
 
+/**
+ * POST : /
+ * req-body {profileImage:"profile.png"}
+ */
+const updateProfileImage = asyncHandler(async (req, res) => {
+  const  profileImage  = req.file.path;
+  const user = await UserService.updateProfileImage(req.user.id, {
+    profileImage,
+  });
+  SuccessResponse.data = user;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
 module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  updateProfileImage,
 };

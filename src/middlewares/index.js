@@ -3,4 +3,5 @@ module.exports = {
   errorHandler: require("./error-handler"),
   UserMiddlewares:require("./user-middlewares"),
   AuthMiddlewares:require("./auth-middlewares"),
+  UploadMiddlewares:require("./upload-middlewares"),
 };

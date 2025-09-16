@@ -1,6 +1,6 @@
 const express = require("express");
 const { UserController } = require("../../controllers");
-const { AuthMiddlewares } = require("../../middlewares");
+const { AuthMiddlewares, UploadMiddlewares } = require("../../middlewares");
 
 const router = express.Router();
 
@@ -19,6 +19,14 @@ router.delete(
   "/",
   AuthMiddlewares.verifyAndAuthorize,
   UserController.deleteUser
+);
+
+// api/v1/users/profile-image  POST
+router.post(
+  "/profile-image",
+  AuthMiddlewares.verifyAndAuthorize,
+  UploadMiddlewares.upload.single("profileImage"),
+  UserController.updateProfileImage
 );
 
 module.exports = router;

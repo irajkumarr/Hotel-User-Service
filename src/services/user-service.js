@@ -61,9 +61,18 @@ async function deleteUser(id) {
   }
 }
 
-async function updateProfileImage() {
+async function updateProfileImage(id, data) {
   try {
+    const user = await userRepository.update(Number(id), data);
+    const { password, ...others } = user;
+    return others;
   } catch (error) {
+    if (error.name === "PrismaClientKnownRequestError") {
+      throw new AppError(
+        "The user you requested to update is not present",
+        StatusCodes.NOT_FOUND
+      );
+    }
     throw new AppError(
       "Something went wrong while updating user profile",
       StatusCodes.INTERNAL_SERVER_ERROR
