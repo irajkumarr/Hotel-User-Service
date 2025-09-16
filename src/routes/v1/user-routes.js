@@ -14,4 +14,11 @@ router.patch(
   UserController.updateUser
 );
 
+// api/v1/users/  DELETE
+router.delete(
+  "/",
+  AuthMiddlewares.verifyAndAuthorize,
+  UserController.deleteUser
+);
+
 module.exports = router;

@@ -5,7 +5,6 @@ const { AppError } = require("../utils");
 const userRepository = new UserRepository();
 
 /**
- * update profile
  * delete account
  */
 async function getUser(id) {
@@ -31,7 +30,7 @@ async function updateUser(id, data) {
   } catch (error) {
     if (error.name === "PrismaClientKnownRequestError") {
       throw new AppError(
-        "The airport you requested to update is not present",
+        "The user you requested to update is not present",
         StatusCodes.NOT_FOUND
       );
     }
@@ -42,7 +41,26 @@ async function updateUser(id, data) {
   }
 }
 
+async function deleteUser(id) {
+  try {
+    const user = await userRepository.delete(Number(id));
+    return user;
+  } catch (error) {
+    if (error.name === "PrismaClientKnownRequestError") {
+      throw new AppError(
+        "The user you requested to delete is not present",
+        StatusCodes.NOT_FOUND
+      );
+    }
+    throw new AppError(
+      "Something went wrong while deleting user",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 module.exports = {
   getUser,
   updateUser,
+  deleteUser,
 };
