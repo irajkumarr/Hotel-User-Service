@@ -88,7 +88,53 @@ function validateLoginRequest(req, res, next) {
   next();
 }
 
+const userUpdateSchema = Joi.object({
+  firstName: Joi.string().messages({
+    "string.empty": "First name cannot be empty",
+    "string.base": "First name must be a string",
+  }),
+  lastName: Joi.string().messages({
+    "string.base": "Last name must be a string",
+    "string.empty": "Last name cannot be empty",
+  }),
+  phoneNumber: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .messages({
+      "string.pattern.base": "Phone number must be exactly 10 digits",
+    }),
+});
+// Middleware
+function validateUpdateRequest(req, res, next) {
+  const { error, value } = userUpdateSchema.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    const errors = error.details.map((detail) => FormatMessage(detail.message));
+    ErrorResponse.message = "Something went wrong while updating user";
+    ErrorResponse.error = new AppError(errors, StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+
+  req.body = value;
+  next();
+}
+
+function validateUpdateProfileImage(req, res, next) {
+  if (!req.file) {
+    ErrorResponse.message = "Profile image is required";
+    ErrorResponse.error = new AppError(
+      ["Please upload a valid profile image (JPEG, PNG)"],
+      StatusCodes.BAD_REQUEST
+    );
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+  next();
+}
+
 module.exports = {
   validateCreateRequest,
   validateLoginRequest,
+  validateUpdateRequest,
+  validateUpdateProfileImage,
 };

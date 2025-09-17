@@ -15,7 +15,7 @@ const getUser = asyncHandler(async (req, res) => {
 
 /**
  * POST : /
- * req-body {firstName:"John",lastName:"Doe"}
+ * req-body {firstName:"John",lastName:"Doe",phoneNumber:"9834323434"}
  */
 const updateUser = asyncHandler(async (req, res) => {
   const { firstName, lastName, phoneNumber } = req.body;

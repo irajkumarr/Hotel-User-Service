@@ -1,6 +1,10 @@
 const express = require("express");
 const { UserController } = require("../../controllers");
-const { AuthMiddlewares, UploadMiddlewares } = require("../../middlewares");
+const {
+  AuthMiddlewares,
+  UploadMiddlewares,
+  UserMiddlewares,
+} = require("../../middlewares");
 
 const router = express.Router();
 
@@ -8,7 +12,12 @@ const router = express.Router();
 router.get("/", AuthMiddlewares.checkAuth, UserController.getUser);
 
 // api/v1/users/  PATCH
-router.patch("/", AuthMiddlewares.checkAuth, UserController.updateUser);
+router.patch(
+  "/",
+  AuthMiddlewares.checkAuth,
+  UserMiddlewares.validateUpdateRequest,
+  UserController.updateUser
+);
 
 // api/v1/users/  DELETE
 router.delete("/", AuthMiddlewares.checkAuth, UserController.deleteUser);
@@ -18,6 +27,7 @@ router.post(
   "/profile-image",
   AuthMiddlewares.checkAuth,
   UploadMiddlewares.upload.single("profileImage"),
+  UserMiddlewares.validateUpdateProfileImage,
   UserController.updateProfileImage
 );
 
