@@ -4,7 +4,7 @@ const apiRoutes = require("./routes");
 const { errorHandler } = require("./middlewares");
 const morgan = require("morgan");
 
-const CRONS = require("./utils/common/cron-jobs");
+const CRONS = require("./scheduler/job-scheduler");
 
 const app = express();
 
