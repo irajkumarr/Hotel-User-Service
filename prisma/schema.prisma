@@ -21,6 +21,7 @@ model User {
   verificationTokenExpiry DateTime? @map("verification_token_expiry")
   resetPasswordToken      String?   @map("reset_password_token")
   resetPasswordExpiry     DateTime? @map("reset_password_expiry")
+  lastTokenSentAt         DateTime? @map("last_token_sent_at")
   lastLogin               DateTime? @map("last_login")
   createdAt               DateTime  @default(now()) @map("created_at")
   updatedAt               DateTime  @updatedAt @map("updated_at")

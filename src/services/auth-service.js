@@ -187,11 +187,17 @@ async function hasRole(userId, roles = []) {
   }
 }
 
-/**
- * forgot password
- * reset password
- * verify email
- */
+const TOKEN_COOLDOWN_MINUTES = 5; // user can request a token only once every 5 minutes
+
+async function canSendToken(user) {
+  if (!user.lastTokenSentAt) return true;
+
+  const now = new Date();
+  const diff = (now - user.lastTokenSentAt) / 1000 / 60; // difference in minutes
+
+  return diff >= TOKEN_COOLDOWN_MINUTES;
+}
+
 async function forgotPassword(email) {
   try {
     const user = await userRepository.getByEmail(email);
@@ -199,6 +205,13 @@ async function forgotPassword(email) {
       throw new AppError(
         "User not found in the database",
         StatusCodes.NOT_FOUND
+      );
+    }
+    // Rate limiting
+    if (!(await canSendToken(user))) {
+      throw new AppError(
+        `You can request a new reset token only once every ${TOKEN_COOLDOWN_MINUTES} minutes`,
+        StatusCodes.TOO_MANY_REQUESTS
       );
     }
     const code = CodeGenerator.generateCode();
@@ -209,6 +222,7 @@ async function forgotPassword(email) {
     await userRepository.update(user.id, {
       resetPasswordToken: hashedToken,
       resetPasswordExpiry: resetPasswordExpiry,
+      lastTokenSentAt: new Date(),
     });
     //send email
     return { message: "Password reset code sent to email" };
@@ -255,6 +269,7 @@ async function resetPassword(data) {
       password: hashedPassword,
       resetPasswordToken: null,
       resetPasswordExpiry: null,
+      lastTokenSentAt: null,
     });
 
     return { message: "Password reset successfully" };

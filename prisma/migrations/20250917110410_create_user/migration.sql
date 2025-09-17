@@ -16,6 +16,7 @@ CREATE TABLE "public"."users" (
     "verification_token_expiry" TIMESTAMP(3),
     "reset_password_token" TEXT,
     "reset_password_expiry" TIMESTAMP(3),
+    "last_token_sent_at" TIMESTAMP(3),
     "last_login" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
