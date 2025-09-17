@@ -4,9 +4,6 @@ const { AppError } = require("../utils");
 
 const userRepository = new UserRepository();
 
-/**
- * delete account
- */
 async function getUser(id) {
   try {
     const user = await userRepository.get(Number(id));

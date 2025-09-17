@@ -5,26 +5,18 @@ const { AuthMiddlewares, UploadMiddlewares } = require("../../middlewares");
 const router = express.Router();
 
 // api/v1/users/  GET
-router.get("/", AuthMiddlewares.verifyAndAuthorize, UserController.getUser);
+router.get("/", AuthMiddlewares.checkAuth, UserController.getUser);
 
 // api/v1/users/  PATCH
-router.patch(
-  "/",
-  AuthMiddlewares.verifyAndAuthorize,
-  UserController.updateUser
-);
+router.patch("/", AuthMiddlewares.checkAuth, UserController.updateUser);
 
 // api/v1/users/  DELETE
-router.delete(
-  "/",
-  AuthMiddlewares.verifyAndAuthorize,
-  UserController.deleteUser
-);
+router.delete("/", AuthMiddlewares.checkAuth, UserController.deleteUser);
 
 // api/v1/users/profile-image  POST
 router.post(
   "/profile-image",
-  AuthMiddlewares.verifyAndAuthorize,
+  AuthMiddlewares.checkAuth,
   UploadMiddlewares.upload.single("profileImage"),
   UserController.updateProfileImage
 );

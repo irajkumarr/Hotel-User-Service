@@ -43,7 +43,7 @@ const deleteUser = asyncHandler(async (req, res) => {
  * req-body {profileImage:"profile.png"}
  */
 const updateProfileImage = asyncHandler(async (req, res) => {
-  const  profileImage  = req.file.path;
+  const profileImage = req.file.path;
   const user = await UserService.updateProfileImage(req.user.id, {
     profileImage,
   });

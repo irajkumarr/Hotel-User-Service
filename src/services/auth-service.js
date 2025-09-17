@@ -3,7 +3,9 @@ const { UserRepository } = require("../repositories");
 const { AppError } = require("../utils");
 const bcrypt = require("bcryptjs");
 const { AuthMiddlewares } = require("../middlewares");
-const { Auth } = require("../utils/common");
+const { Auth, Enums } = require("../utils/common");
+const { ServerConfig } = require("../config");
+const { ADMIN } = Enums.ROLE;
 
 const userRepository = new UserRepository();
 
@@ -17,9 +19,10 @@ async function createUser(data) {
       );
     }
 
-    // const salt = await bcrypt.genSalt(10);
-    // data.password = await bcrypt.hash(data.password, salt);
-    data.password =await Auth.hashPassword(data.password, 10);
+    data.password = await Auth.hashPassword(
+      data.password,
+      ServerConfig.SALT_ROUNDS
+    );
 
     const user = await userRepository.create({ data });
     const { password, ...others } = user;
@@ -56,8 +59,7 @@ async function loginUser(data) {
         StatusCodes.FORBIDDEN
       );
     }
-    // const isMatch = await bcrypt.compare(data.password, user.password);
-    const isMatch =await Auth.checkPassword(data.password, user.password);
+    const isMatch = await Auth.checkPassword(data.password, user.password);
     if (!isMatch) {
       throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
     }
@@ -66,7 +68,7 @@ async function loginUser(data) {
       role: user.role,
       email: user.email,
     };
-    const userToken = AuthMiddlewares.generateToken(payload);
+    const userToken = Auth.generateToken(payload);
     await userRepository.update(user.id, {
       lastLogin: new Date(),
     });
@@ -77,7 +79,6 @@ async function loginUser(data) {
       userToken,
     };
   } catch (error) {
-    console.log(error);
     if (error instanceof AppError) {
       throw error;
     }
@@ -88,7 +89,89 @@ async function loginUser(data) {
   }
 }
 
+async function isAuthenticated(token) {
+  try {
+    if (!token) {
+      throw new AppError("Missing JWT token", StatusCodes.BAD_REQUEST);
+    }
+
+    const payload = Auth.verifyToken(token); // decode token
+    const user = await userRepository.get(Number(payload.id));
+
+    if (!user) {
+      throw new AppError(
+        "No user found in the database",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    return user; // full user object
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+
+    if (error.name === "JsonWebTokenError") {
+      throw new AppError("Invalid JWT token", StatusCodes.BAD_REQUEST);
+    }
+    if (error.name === "TokenExpiredError") {
+      throw new AppError("JWT token expired", StatusCodes.BAD_REQUEST);
+    }
+
+    throw new AppError(
+      "Something went wrong while authenticating",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
+async function isAdmin(userId) {
+  try {
+    const user = await userRepository.get(Number(userId));
+
+    if (!user) {
+      throw new AppError(
+        "No user found for the given id",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    return user.role === ADMIN;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+
+    throw new AppError(
+      "Something went wrong",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
+//  General role check
+async function hasRole(userId, roles = []) {
+  try {
+    const user = await userRepository.get(Number(userId));
+
+    if (!user) {
+      throw new AppError(
+        "No user found for the given id",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    return roles.includes(user.role);
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+
+    throw new AppError(
+      "Something went wrong",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 module.exports = {
   createUser,
   loginUser,
+  isAuthenticated,
+  isAdmin,
+  hasRole,
 };

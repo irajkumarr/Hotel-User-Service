@@ -1,51 +1,52 @@
-const jwt = require("jsonwebtoken");
-const fs = require("fs");
-const { ServerConfig } = require("../config");
-const { ErrorResponse, Auth } = require("../utils/common");
 const { AppError } = require("../utils");
 const { StatusCodes } = require("http-status-codes");
+const { AuthService } = require("../services");
 
-const verifyToken = (req, res, next) => {
-  const authorization = req.headers.authorization;
-  if (!authorization) {
-    throw new AppError("Token not found", StatusCodes.UNAUTHORIZED);
-  }
-  const token = authorization.split(" ")[1];
-  if (!token) {
-    throw new AppError("Access Denied ❌", StatusCodes.UNAUTHORIZED);
-  }
+async function checkAuth(req, res, next) {
   try {
-    const response = Auth.verifyToken(token);
-    req.user = response;
+    const token = req.headers["x-access-token"];
+    const user = await AuthService.isAuthenticated(token);
+    req.user = user; // attach user object
     next();
   } catch (error) {
-    throw new AppError("Invalid token", StatusCodes.UNAUTHORIZED);
+    throw new AppError(error.message, error.statusCode);
   }
-};
+}
 
-const verifyAdmin = (req, res, next) => {
-  verifyToken(req, res, () => {
-    if (req.user.role === "ADMIN") {
-      next();
-    } else {
-      throw new AppError("Access Denied ❌", StatusCodes.UNAUTHORIZED);
+async function isAdmin(req, res, next) {
+  try {
+    const allowed = await AuthService.isAdmin(req.user.id);
+    if (!allowed) {
+      throw new AppError(
+        "User not authorized for this action",
+        StatusCodes.UNAUTHORIZED
+      );
     }
-  });
-};
+    next();
+  } catch (error) {
+    throw new AppError(error.message, error.statusCode);
+  }
+}
 
-const verifyAndAuthorize = (req, res, next) => {
-  verifyToken(req, res, () => {
-    if (req.user.role === "ADMIN" || req.user.role === "USER") {
+function verifyRole(...roles) {
+  return async (req, res, next) => {
+    try {
+      const allowed = await UserService.hasRole(req.user.id, roles);
+      if (!allowed) {
+        throw new AppError(
+          "User not authorized for this action",
+          StatusCodes.UNAUTHORIZED
+        );
+      }
       next();
-    } else {
-      throw new AppError("Access Denied ❌", StatusCodes.UNAUTHORIZED);
+    } catch (error) {
+      throw new AppError(error.message, error.statusCode);
     }
-  });
-};
+  };
+}
 
 module.exports = {
-  generateToken,
-  verifyToken,
-  verifyAdmin,
-  verifyAndAuthorize,
+  checkAuth,
+  isAdmin,
+  verifyRole,
 };
