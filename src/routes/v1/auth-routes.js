@@ -18,4 +18,10 @@ router.post(
   AuthController.loginUser
 );
 
+// api/v1/auth/forgot-password  POST
+router.post("/forgot-password", AuthController.forgotPassword);
+
+// api/v1/auth/reset-password  POST
+router.post("/reset-password", AuthController.resetPassword);
+
 module.exports = router;

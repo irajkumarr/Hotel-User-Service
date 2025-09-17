@@ -3,4 +3,5 @@ module.exports = {
   SuccessResponse: require("./success-response"),
   Auth: require("./auth"),
   Enums: require("./enums"),
+  CodeGenerator: require("./code-generator"),
 };

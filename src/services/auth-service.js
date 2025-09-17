@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const { UserRepository } = require("../repositories");
 const { AppError } = require("../utils");
-const { Auth, Enums } = require("../utils/common");
+const { Auth, Enums, CodeGenerator } = require("../utils/common");
 const { ServerConfig } = require("../config");
 const { ADMIN } = Enums.ROLE;
 
@@ -19,7 +19,7 @@ async function createUser(data) {
 
     data.password = await Auth.hashPassword(
       data.password,
-      ServerConfig.SALT_ROUNDS
+      +ServerConfig.SALT_ROUNDS
     );
 
     const user = await userRepository.create({ data });
@@ -166,10 +166,89 @@ async function hasRole(userId, roles = []) {
   }
 }
 
+/**
+ * forgot password
+ * reset password
+ * verify email
+ */
+async function forgotPassword(email) {
+  try {
+    const user = await userRepository.getByEmail(email);
+    if (!user) {
+      throw new AppError(
+        "User not found in the database",
+        StatusCodes.NOT_FOUND
+      );
+    }
+    const code = CodeGenerator.generateCode();
+    const hashedToken = CodeGenerator.hashCode(code);
+    const resetPasswordExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await userRepository.update(user.id, {
+      resetPasswordToken: hashedToken,
+      resetPasswordExpiry: resetPasswordExpiry,
+    });
+    //send email
+    return { message: "Password reset code sent to email" };
+  } catch (error) {
+    throw new AppError(
+      "Something went wrong while creating reset token",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
+async function resetPassword(data) {
+  try {
+    const user = await userRepository.getByEmail(data.email);
+    if (!user) {
+      throw new AppError(
+        "User not found in the database",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    const hashedCode = CodeGenerator.hashCode(code);
+
+    if (
+      !user.resetPasswordToken ||
+      user.resetPasswordToken !== hashedCode ||
+      !user.resetPasswordExpiry ||
+      user.resetPasswordExpiry < new Date()
+    ) {
+      throw new AppError(
+        "Invalid or expired reset code",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const hashedPassword = await Auth.hashPassword(
+      data.newPassword,
+      ServerConfig.SALT_ROUNDS
+    );
+
+    await userRepository.update(user.id, {
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpiry: null,
+    });
+
+    return { message: "Password reset successfully" };
+  } catch (error) {
+    throw new AppError(
+      "Something went wrong while creating reset token",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 module.exports = {
   createUser,
   loginUser,
   isAuthenticated,
   isAdmin,
   hasRole,
+  forgotPassword,
+  resetPassword,
+  // verifyEmail,
 };

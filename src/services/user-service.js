@@ -77,12 +77,6 @@ async function updateProfileImage(id, data) {
   }
 }
 
-/**
- * reset password
- * verify email
- * forgot password
- */
-
 module.exports = {
   getUser,
   updateUser,

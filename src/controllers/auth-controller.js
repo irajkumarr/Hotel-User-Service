@@ -53,7 +53,37 @@ const loginUser = asyncHandler(async (req, res) => {
   return res.status(StatusCodes.OK).json(SuccessResponse);
 });
 
+/**
+ * POST : /
+ * req-body {email: "raj@gmail.com"}
+ */
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const response = await AuthService.forgotPassword(email);
+
+  SuccessResponse.data = response;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
+/**
+ * POST : /
+ * req-body {email: "raj@gmail.com",code:"123456",newPassword:"Raj123456"}
+ */
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  const response = await AuthService.forgotPassword({
+    email,
+    code,
+    newPassword,
+  });
+
+  SuccessResponse.data = response;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
 module.exports = {
   createUser,
   loginUser,
+  forgotPassword,
+  resetPassword,
 };

@@ -10,9 +10,9 @@ async function checkPassword(plainPassword, encryptedPassword) {
   }
 }
 
-async function hashPassword(plainPassword, saltRound) {
+async function hashPassword(plainPassword, saltRounds) {
   try {
-    const salt = await bcrypt.genSalt(saltRound);
+    const salt = await bcrypt.genSalt(saltRounds);
     return await bcrypt.hash(plainPassword, salt);
   } catch (error) {
     throw error;
