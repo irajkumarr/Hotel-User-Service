@@ -3,6 +3,7 @@ const { UserRepository } = require("../repositories");
 const { AppError } = require("../utils");
 const bcrypt = require("bcryptjs");
 const { AuthMiddlewares } = require("../middlewares");
+const { Auth } = require("../utils/common");
 
 const userRepository = new UserRepository();
 
@@ -16,8 +17,9 @@ async function createUser(data) {
       );
     }
 
-    const salt = await bcrypt.genSalt(10);
-    data.password = await bcrypt.hash(data.password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // data.password = await bcrypt.hash(data.password, salt);
+    data.password = Auth.hashPassword(data.password, 10);
 
     const user = await userRepository.create({ data });
     const { password, ...others } = user;
@@ -54,7 +56,8 @@ async function loginUser(data) {
         StatusCodes.FORBIDDEN
       );
     }
-    const isMatch = await bcrypt.compare(data.password, user.password);
+    // const isMatch = await bcrypt.compare(data.password, user.password);
+    const isMatch = Auth.checkPassword(data.password, user.password);
     if (!isMatch) {
       throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
     }
