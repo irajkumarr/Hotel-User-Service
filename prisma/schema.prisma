@@ -8,19 +8,24 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
-  password     String
-  firstName    String?   @map("first_name")
-  lastName     String?   @map("last_name")
-  phoneNumber  String?   @unique @map("phone_number")
-  role         Role      @default(USER)
-  profileImage String?   @map("profile_image")
-  isVerified   Boolean   @default(true)
-  lastLogin    DateTime? @map("last_login")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id                      Int       @id @default(autoincrement())
+  email                   String    @unique
+  password                String
+  firstName               String?   @map("first_name")
+  lastName                String?   @map("last_name")
+  phoneNumber             String?   @unique @map("phone_number")
+  role                    Role      @default(USER)
+  profileImage            String?   @map("profile_image")
+  isVerified              Boolean   @default(false) @map("is_verified")
+  verificationToken       String?   @map("verification_token")
+  verificationTokenExpiry DateTime? @map("verification_token_expiry")
+  resetPasswordToken      String?   @map("reset_password_token")
+  resetPasswordExpiry     DateTime? @map("reset_password_expiry")
+  lastLogin               DateTime? @map("last_login")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
 
+  @@index([email, id])
   @@map("users")
 }
 
