@@ -11,6 +11,12 @@ async function createUser(data) {
   try {
     const existingUser = await userRepository.getByEmail(data.email);
     if (existingUser) {
+      if (!existingUser.isVerified) {
+        throw new AppError(
+          "User already registered but not verified. Please verify your email.",
+          StatusCodes.CONFLICT
+        );
+      }
       throw new AppError(
         "User already exists with this email",
         StatusCodes.CONFLICT
@@ -31,7 +37,6 @@ async function createUser(data) {
       verificationToken: verificationToken,
       verificationTokenExpiry: verificationTokenExpiry,
     });
-    // const { password, ...others } = user;
     return { message: "User registered. Please verify email." };
   } catch (error) {
     if (error instanceof AppError) {
