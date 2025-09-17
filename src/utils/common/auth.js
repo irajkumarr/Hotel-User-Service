@@ -2,18 +2,18 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { ServerConfig } = require("../../config");
 
-function checkPassword(plainPassword, encryptedPassword) {
+async function checkPassword(plainPassword, encryptedPassword) {
   try {
-    return bcrypt.compareSync(plainPassword, encryptedPassword);
+    return await bcrypt.compare(plainPassword, encryptedPassword);
   } catch (error) {
     throw error;
   }
 }
 
-function hashPassword(plainPassword, saltRound) {
+async function hashPassword(plainPassword, saltRound) {
   try {
-    const salt = bcrypt.genSaltSync(saltRound);
-    return bcrypt.hashSync(plainPassword, salt);
+    const salt = await bcrypt.genSalt(saltRound);
+    return await bcrypt.hash(plainPassword, salt);
   } catch (error) {
     throw error;
   }

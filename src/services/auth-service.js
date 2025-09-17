@@ -19,7 +19,7 @@ async function createUser(data) {
 
     // const salt = await bcrypt.genSalt(10);
     // data.password = await bcrypt.hash(data.password, salt);
-    data.password = Auth.hashPassword(data.password, 10);
+    data.password =await Auth.hashPassword(data.password, 10);
 
     const user = await userRepository.create({ data });
     const { password, ...others } = user;
@@ -57,7 +57,7 @@ async function loginUser(data) {
       );
     }
     // const isMatch = await bcrypt.compare(data.password, user.password);
-    const isMatch = Auth.checkPassword(data.password, user.password);
+    const isMatch =await Auth.checkPassword(data.password, user.password);
     if (!isMatch) {
       throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
     }
