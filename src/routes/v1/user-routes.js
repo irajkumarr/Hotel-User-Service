@@ -31,4 +31,11 @@ router.post(
   UserController.updateProfileImage
 );
 
+// api/v1/users/change-password  POST
+router.post(
+  "/change-password",
+  AuthMiddlewares.checkAuth,
+  UserController.updatePassword
+);
+
 module.exports = router;

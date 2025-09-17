@@ -51,9 +51,25 @@ const updateProfileImage = asyncHandler(async (req, res) => {
   return res.status(StatusCodes.OK).json(SuccessResponse);
 });
 
+/**
+ * POST : /
+ * req-body {newPassword:"password12",oldPassword:"password123"}
+ */
+const updatePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const response = await UserService.updatePassword(req.user.id, {
+    oldPassword,
+    newPassword,
+  });
+  SuccessResponse.data = response;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
 module.exports = {
   getUser,
   updateUser,
   deleteUser,
   updateProfileImage,
+  updatePassword,
 };

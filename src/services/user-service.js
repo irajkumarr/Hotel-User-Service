@@ -1,6 +1,8 @@
 const { StatusCodes } = require("http-status-codes");
 const { UserRepository } = require("../repositories");
 const { AppError } = require("../utils");
+const { Auth } = require("../utils/common");
+const { ServerConfig } = require("../config");
 
 const userRepository = new UserRepository();
 
@@ -77,6 +79,39 @@ async function updateProfileImage(id, data) {
   }
 }
 
+async function updatePassword(id, data) {
+  try {
+    const user = await userRepository.get(Number(id));
+    if (!user) {
+      throw new AppError(
+        "User not found in the database",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    if (!(await Auth.checkPassword(data.oldPassword, user.password))) {
+      throw new AppError("Incorrect old password", StatusCodes.UNAUTHORIZED);
+    }
+    data.newPassword = await Auth.hashPassword(
+      data.newPassword,
+      +ServerConfig.SALT_ROUNDS
+    );
+    await userRepository.update(user.id, {
+      password: data.newPassword,
+    });
+
+    return { message: "Password changed successfully" };
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(
+      "Something went wrong while updating user password",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 async function clearExpiredVerificationToken() {
   try {
     const time = new Date();
@@ -112,6 +147,7 @@ module.exports = {
   updateUser,
   deleteUser,
   updateProfileImage,
+  updatePassword,
   clearExpiredVerificationToken,
   clearExpiredResetToken,
   deleteUnverifiedAccounts,
