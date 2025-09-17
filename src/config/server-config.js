@@ -6,6 +6,8 @@ module.exports = {
   PORT: process.env.PORT,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
   SALT_ROUNDS: process.env.SALT_ROUNDS,
+  ACCOUNT_VERIFICATION_EXPIRY_HOURS:
+    process.env.ACCOUNT_VERIFICATION_EXPIRY_HOURS,
   // Load private and public keys
   PRIVATE_KEY: fs.readFileSync(
     path.join(__dirname, "../../private.key"),

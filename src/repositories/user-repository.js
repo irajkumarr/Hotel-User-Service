@@ -16,6 +16,43 @@ class UserRepository extends CrudRepository {
     });
     return response;
   }
+
+  async clearExpiredVerificationToken(timestamp) {
+    const response = await prisma.user.updateMany({
+      where: {
+        verificationTokenExpiry: { lt: timestamp },
+        isVerified: false,
+      },
+      data: {
+        verificationToken: null,
+        verificationTokenExpiry: null,
+      },
+    });
+    return response;
+  }
+
+  async clearExpiredResetToken(timestamp) {
+    const response = await prisma.user.updateMany({
+      where: {
+        resetPasswordExpiry: { lt: timestamp },
+      },
+      data: {
+        resetPasswordToken: null,
+        resetPasswordExpiry: null,
+      },
+    });
+    return response;
+  }
+
+  async deleteUnverifiedAccounts(timestamp) {
+    const response = await prisma.user.deleteMany({
+      where: {
+        isVerified: false,
+        createdAt: { lt: timestamp },
+      },
+    });
+    return response;
+  }
 }
 
 module.exports = UserRepository;

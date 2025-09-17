@@ -77,9 +77,42 @@ async function updateProfileImage(id, data) {
   }
 }
 
+async function clearExpiredVerificationToken() {
+  try {
+    const time = new Date();
+    const response = await userRepository.clearExpiredVerificationToken(time);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function clearExpiredResetToken() {
+  try {
+    const time = new Date();
+    const response = await userRepository.clearExpiredResetToken(time);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function deleteUnverifiedAccounts(expiryHours = 1) {
+  try {
+    const time = new Date(Date.now() - expiryHours * 60 * 60 * 1000);
+    const response = await userRepository.deleteUnverifiedAccounts(time);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   getUser,
   updateUser,
   deleteUser,
   updateProfileImage,
+  clearExpiredVerificationToken,
+  clearExpiredResetToken,
+  deleteUnverifiedAccounts,
 };
