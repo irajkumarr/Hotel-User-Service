@@ -22,7 +22,7 @@ const createUser = asyncHandler(async (req, res) => {
     phoneNumber,
     profileImage,
   } = req.body;
-  const user = await AuthService.createUser({
+  const response = await AuthService.createUser({
     email,
     password,
     firstName,
@@ -32,7 +32,7 @@ const createUser = asyncHandler(async (req, res) => {
     profileImage,
   });
 
-  SuccessResponse.data = user;
+  SuccessResponse.data = response;
   return res.status(StatusCodes.CREATED).json(SuccessResponse);
 });
 
@@ -81,9 +81,25 @@ const resetPassword = asyncHandler(async (req, res) => {
   return res.status(StatusCodes.OK).json(SuccessResponse);
 });
 
+/**
+ * POST : /
+ * req-body {email: "raj@gmail.com",code:"123456"}
+ */
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { email, code } = req.body;
+  const response = await AuthService.verifyEmail({
+    email,
+    code,
+  });
+
+  SuccessResponse.data = response;
+  return res.status(StatusCodes.OK).json(SuccessResponse);
+});
+
 module.exports = {
   createUser,
   loginUser,
   forgotPassword,
   resetPassword,
+  verifyEmail,
 };

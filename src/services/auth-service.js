@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const { UserRepository } = require("../repositories");
-const { AppError } = require("../utils");
+const { AppError, FormatMessage } = require("../utils");
 const { Auth, Enums, CodeGenerator } = require("../utils/common");
 const { ServerConfig } = require("../config");
 const { ADMIN } = Enums.ROLE;
@@ -22,16 +22,32 @@ async function createUser(data) {
       +ServerConfig.SALT_ROUNDS
     );
 
-    const user = await userRepository.create({ data });
-    const { password, ...others } = user;
-    return others;
+    const verificationToken = CodeGenerator.generateCode();
+    console.log(verificationToken);
+    const verificationTokenExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await userRepository.create({
+      ...data,
+      verificationToken: verificationToken,
+      verificationTokenExpiry: verificationTokenExpiry,
+    });
+    // const { password, ...others } = user;
+    return { message: "User registered. Please verify email." };
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
     }
     //Unique Constraint Error
-    if (error.name === "PrismaClientKnownRequestError") {
-      throw new AppError("Phone number already exists in the database");
+    if (
+      error.code === "P2002" ||
+      error.code === "PrismaClientKnownRequestError"
+    ) {
+      const target = FormatMessage(error.meta?.target?.join(", ") || "field");
+
+      throw new AppError(
+        `${target} already exists in the database`,
+        StatusCodes.CONFLICT
+      );
     }
     // Validation error
     if (error.name === "PrismaClientValidationError") {
@@ -192,6 +208,8 @@ async function forgotPassword(email) {
     //send email
     return { message: "Password reset code sent to email" };
   } catch (error) {
+    if (error instanceof AppError) throw error;
+
     throw new AppError(
       "Something went wrong while creating reset token",
       StatusCodes.INTERNAL_SERVER_ERROR
@@ -236,7 +254,8 @@ async function resetPassword(data) {
 
     return { message: "Password reset successfully" };
   } catch (error) {
-    console.log(error);
+    if (error instanceof AppError) throw error;
+
     throw new AppError(
       "Something went wrong while resetting password",
       StatusCodes.INTERNAL_SERVER_ERROR
@@ -244,7 +263,44 @@ async function resetPassword(data) {
   }
 }
 
+async function verifyEmail(data) {
+  try {
+    const user = await userRepository.getByEmail(data.email);
+    if (!user) {
+      throw new AppError(
+        "User not found in the database",
+        StatusCodes.NOT_FOUND
+      );
+    }
 
+    if (
+      !user.verificationToken ||
+      user.verificationToken !== data.code ||
+      !user.verificationTokenExpiry ||
+      user.verificationTokenExpiry < new Date()
+    ) {
+      throw new AppError(
+        "Invalid or expired verification code",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    await userRepository.update(user.id, {
+      isVerified: true,
+      verificationToken: null,
+      verificationTokenExpiry: null,
+    });
+
+    return { message: "Email verified successfully" };
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+
+    throw new AppError(
+      "Something went wrong while verifying email",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
 
 module.exports = {
   createUser,
@@ -254,5 +310,5 @@ module.exports = {
   hasRole,
   forgotPassword,
   resetPassword,
-  // verifyEmail,
+  verifyEmail,
 };

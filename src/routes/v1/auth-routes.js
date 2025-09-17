@@ -24,4 +24,7 @@ router.post("/forgot-password", AuthController.forgotPassword);
 // api/v1/auth/reset-password  POST
 router.post("/reset-password", AuthController.resetPassword);
 
+// api/v1/auth/verify-email  POST
+router.post("/verify-email", AuthController.verifyEmail);
+
 module.exports = router;
