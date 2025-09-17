@@ -1,6 +1,6 @@
 const cron = require("node-cron");
-const { UserService } = require("../../services");
-const { Logger, ServerConfig } = require("../../config");
+const { UserService } = require("../services");
+const { Logger, ServerConfig } = require("../config");
 
 function scheduleCrons() {
   // Clear expired verification tokens
