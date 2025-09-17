@@ -1,8 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const { UserRepository } = require("../repositories");
 const { AppError } = require("../utils");
-const bcrypt = require("bcryptjs");
-const { AuthMiddlewares } = require("../middlewares");
 const { Auth, Enums } = require("../utils/common");
 const { ServerConfig } = require("../config");
 const { ADMIN } = Enums.ROLE;
