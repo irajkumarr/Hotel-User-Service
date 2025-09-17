@@ -1,6 +1,7 @@
 const cron = require("node-cron");
 const { UserService } = require("../services");
 const { Logger, ServerConfig } = require("../config");
+const { clearOldCombinedLog } = require("../services/log-cleaner");
 
 function scheduleCrons() {
   // Clear expired verification tokens
@@ -42,6 +43,18 @@ function scheduleCrons() {
       }
     } catch (err) {
       Logger.error(`Error deleting unverified accounts: ${err.message}`);
+    }
+  });
+
+  // Clear combined.log if older than 15 minutes
+  cron.schedule("*/5 * * * * *", async () => {
+    try {
+      const result = await clearOldCombinedLog(15);
+      if (result.cleared) {
+        Logger.info("🧹 Cleared old combined.log (older than 15 mins)");
+      }
+    } catch (err) {
+      Logger.error(`Error clearing combined.log: ${err.message}`);
     }
   });
 }
