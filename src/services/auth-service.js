@@ -181,6 +181,7 @@ async function forgotPassword(email) {
       );
     }
     const code = CodeGenerator.generateCode();
+    console.log(code);
     const hashedToken = CodeGenerator.hashCode(code);
     const resetPasswordExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -208,7 +209,7 @@ async function resetPassword(data) {
       );
     }
 
-    const hashedCode = CodeGenerator.hashCode(code);
+    const hashedCode = CodeGenerator.hashCode(data.code);
 
     if (
       !user.resetPasswordToken ||
@@ -224,7 +225,7 @@ async function resetPassword(data) {
 
     const hashedPassword = await Auth.hashPassword(
       data.newPassword,
-      ServerConfig.SALT_ROUNDS
+      +ServerConfig.SALT_ROUNDS
     );
 
     await userRepository.update(user.id, {
@@ -235,12 +236,15 @@ async function resetPassword(data) {
 
     return { message: "Password reset successfully" };
   } catch (error) {
+    console.log(error);
     throw new AppError(
-      "Something went wrong while creating reset token",
+      "Something went wrong while resetting password",
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
 }
+
+
 
 module.exports = {
   createUser,
