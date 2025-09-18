@@ -5,8 +5,10 @@ const {
   RESET_TOKEN_PAYLOAD,
   UNVERIFIED_ACCOUNT_PAYLOAD,
 } = require("../producers/token-producer");
-const { TOKEN_QUEUE, Worker } = require("../queues/token-queue");
+const { TOKEN_QUEUE } = require("../queues/token-queue");
+const { Worker } = require("bullmq");
 const { UserService } = require("../services");
+
 
 const setupTokenJobWorker = () => {
   // Worker to process token-related jobs
