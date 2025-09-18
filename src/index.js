@@ -6,6 +6,9 @@ const morgan = require("morgan");
 
 const CRONS = require("./scheduler/job-scheduler");
 const { setupTokenJobWorker } = require("./processors/token-processor");
+const {
+  attachCorrelationIdMiddleware,
+} = require("./middlewares/correlation-middleware");
 
 const app = express();
 
@@ -13,6 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(attachCorrelationIdMiddleware);
 
 //routes
 app.use("/api", apiRoutes);
