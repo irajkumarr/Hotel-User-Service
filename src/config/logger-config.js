@@ -1,26 +1,12 @@
-// const { createLogger, format, transports } = require("winston");
-// const { combine, timestamp, printf } = format;
-
-// const customFormat = printf(({ level, message, timestamp }) => {
-//   return `${timestamp}: ${level}: ${message}`;
-// });
-
-// const logger = createLogger({
-//   format: combine(timestamp(), customFormat),
-//   transports: [
-//     new transports.Console({ format: combine(colorize(), customFormat) }),
-//     new transports.File({ filename: "combined.log" }),
-//   ],
-// });
-
-// module.exports = logger;
-
 const { createLogger, format, transports } = require("winston");
 const { combine, timestamp, printf } = format;
 require("winston-daily-rotate-file");
 
+const { getCorrelationId } = require("../utils/helpers/request-helpers");
+
 const customFormat = printf(({ level, message, timestamp }) => {
-  return `${timestamp}: ${level}: ${message}`;
+  const correlationId = getCorrelationId();
+  return `${timestamp}:[${correlationId}] ${level}: ${message}`;
 });
 
 // Configure daily rotate

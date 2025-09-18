@@ -1,5 +1,5 @@
 const CrudRepository = require("./crud-repository");
-const { prisma } = require("../config");
+const { prisma, Logger } = require("../config");
 const { AppError } = require("../utils");
 const { StatusCodes } = require("http-status-codes");
 
@@ -14,6 +14,7 @@ class UserRepository extends CrudRepository {
         email: email,
       },
     });
+
     return response;
   }
 
