@@ -5,6 +5,7 @@ const { errorHandler } = require("./middlewares");
 const morgan = require("morgan");
 
 const CRONS = require("./scheduler/job-scheduler");
+const { setupTokenJobWorker } = require("./processors/token-processor");
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use(errorHandler);
 
 //* Start cron jobs
 CRONS();
+
+//* Start worker
+setupTokenJobWorker();
 
 //Server starting
 app.listen(ServerConfig.PORT, () => {
