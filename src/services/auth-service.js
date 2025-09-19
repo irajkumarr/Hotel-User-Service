@@ -123,6 +123,12 @@ async function isAuthenticated(token) {
         StatusCodes.NOT_FOUND
       );
     }
+    if (!user.isVerified) {
+      throw new AppError(
+        "Please verify your email before accessing this resource",
+        StatusCodes.FORBIDDEN
+      );
+    }
     return { id: user.id };
   } catch (error) {
     if (error instanceof AppError) throw error;
