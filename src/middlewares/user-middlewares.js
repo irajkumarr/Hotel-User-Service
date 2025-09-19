@@ -120,6 +120,69 @@ function validateUpdateRequest(req, res, next) {
   next();
 }
 
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Email must be valid",
+    "string.empty": "Email cannot be empty",
+  }),
+});
+
+function validateForgotPasswordRequest(req, res, next) {
+  const { error, value } = forgotPasswordSchema.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    const errors = error.details.map((detail) => FormatMessage(detail.message));
+    ErrorResponse.message =
+      "Something went wrong while forgotting user password";
+    ErrorResponse.error = new AppError(errors, StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+
+  req.body = value;
+  next();
+}
+
+const resetPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Email must be valid",
+    "string.empty": "Email cannot be empty",
+  }),
+  code: Joi.string().required().max(6).min(6).messages({
+    "any.required": "Code is required",
+    "string.email": "Code must be valid",
+    "string.empty": "Code cannot be empty",
+    "string.min": "Code must be 6 characters",
+    "string.max": "Code cannot exceed 6 characters",
+  }),
+  newPassword: Joi.string().min(6).max(60).required().messages({
+    "string.base": "Password must be a string",
+    "string.empty": "Password cannot be empty",
+    "string.min": "Password must be at least 6 characters long",
+    "string.max": "Password cannot exceed 60 characters",
+    "any.required": "Password is required",
+  }),
+});
+
+function validateResetPasswordRequest(req, res, next) {
+  const { error, value } = resetPasswordSchema.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    const errors = error.details.map((detail) => FormatMessage(detail.message));
+    ErrorResponse.message = "Something went wrong while reseting user password";
+    ErrorResponse.error = new AppError(errors, StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+
+  req.body = value;
+  next();
+}
+
 function validateUpdateProfileImage(req, res, next) {
   if (!req.file) {
     ErrorResponse.message = "Profile image is required";
@@ -137,4 +200,6 @@ module.exports = {
   validateLoginRequest,
   validateUpdateRequest,
   validateUpdateProfileImage,
+  validateForgotPasswordRequest,
+  validateResetPasswordRequest,
 };

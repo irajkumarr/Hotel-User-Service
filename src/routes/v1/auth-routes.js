@@ -19,10 +19,18 @@ router.post(
 );
 
 // api/v1/auth/forgot-password  POST
-router.post("/forgot-password", AuthController.forgotPassword);
+router.post(
+  "/forgot-password",
+  UserMiddlewares.validateForgotPasswordRequest,
+  AuthController.forgotPassword
+);
 
 // api/v1/auth/reset-password  POST
-router.post("/reset-password", AuthController.resetPassword);
+router.post(
+  "/reset-password",
+  UserMiddlewares.validateResetPasswordRequest,
+  AuthController.resetPassword
+);
 
 // api/v1/auth/verify-email  POST
 router.post("/verify-email", AuthController.verifyEmail);
