@@ -217,12 +217,12 @@ async function forgotPassword(email) {
       );
     }
     // Rate limiting
-    if (!(await canSendToken(user))) {
-      throw new AppError(
-        `You can request a new reset token only once every ${TOKEN_COOLDOWN_MINUTES} minutes`,
-        StatusCodes.TOO_MANY_REQUESTS
-      );
-    }
+    // if (!(await canSendToken(user))) {
+    //   throw new AppError(
+    //     `You can request a new reset token only once every ${TOKEN_COOLDOWN_MINUTES} minutes`,
+    //     StatusCodes.TOO_MANY_REQUESTS
+    //   );
+    // }
     const code = CodeGenerator.generateCode();
     console.log(code);
     const hashedToken = CodeGenerator.hashCode(code);
