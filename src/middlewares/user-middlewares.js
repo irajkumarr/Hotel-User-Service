@@ -183,6 +183,37 @@ function validateResetPasswordRequest(req, res, next) {
   next();
 }
 
+const verifyEmailSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "any.required": "Email is required",
+    "string.email": "Email must be valid",
+    "string.empty": "Email cannot be empty",
+  }),
+  code: Joi.string().required().max(6).min(6).messages({
+    "any.required": "Code is required",
+    "string.email": "Code must be valid",
+    "string.empty": "Code cannot be empty",
+    "string.min": "Code must be 6 characters",
+    "string.max": "Code cannot exceed 6 characters",
+  }),
+});
+
+function validateVerifyEmailRequest(req, res, next) {
+  const { error, value } = verifyEmailSchema.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    const errors = error.details.map((detail) => FormatMessage(detail.message));
+    ErrorResponse.message = "Something went wrong while verifying user";
+    ErrorResponse.error = new AppError(errors, StatusCodes.BAD_REQUEST);
+    return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+  }
+
+  req.body = value;
+  next();
+}
+
 function validateUpdateProfileImage(req, res, next) {
   if (!req.file) {
     ErrorResponse.message = "Profile image is required";
@@ -202,4 +233,5 @@ module.exports = {
   validateUpdateProfileImage,
   validateForgotPasswordRequest,
   validateResetPasswordRequest,
+  validateVerifyEmailRequest,
 };

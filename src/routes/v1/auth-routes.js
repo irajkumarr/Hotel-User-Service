@@ -33,6 +33,10 @@ router.post(
 );
 
 // api/v1/auth/verify-email  POST
-router.post("/verify-email", AuthController.verifyEmail);
+router.post(
+  "/verify-email",
+  UserMiddlewares.validateVerifyEmailRequest,
+  AuthController.verifyEmail
+);
 
 module.exports = router;
