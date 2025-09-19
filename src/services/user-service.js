@@ -12,6 +12,7 @@ async function getUser(id) {
     const { password, ...others } = user;
     return others;
   } catch (error) {
+    console.log(error);
     if (error.statusCode === StatusCodes.NOT_FOUND) {
       throw new AppError("User not found in the database");
     }

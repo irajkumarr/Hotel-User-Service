@@ -114,8 +114,8 @@ async function isAuthenticated(token) {
       throw new AppError("Missing JWT token", StatusCodes.BAD_REQUEST);
     }
 
-    const payload = Auth.verifyToken(token); // decode token
-    const user = await userRepository.get(Number(payload.id));
+    const response = Auth.verifyToken(token); // decode token
+    const user = await userRepository.get(Number(response.id));
 
     if (!user) {
       throw new AppError(
@@ -123,8 +123,7 @@ async function isAuthenticated(token) {
         StatusCodes.NOT_FOUND
       );
     }
-
-    return user; // full user object
+    return { id: user.id };
   } catch (error) {
     if (error instanceof AppError) throw error;
 

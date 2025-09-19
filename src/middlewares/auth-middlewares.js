@@ -4,9 +4,19 @@ const { AuthService } = require("../services");
 
 async function checkAuth(req, res, next) {
   try {
-    const token = req.headers["x-access-token"];
-    const user = await AuthService.isAuthenticated(token);
-    req.user = user; // attach user object
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new AppError(
+        "Missing or invalid Authorization header",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const token = authHeader.split(" ")[1]; // get the token part after 'Bearer'
+    const response = await AuthService.isAuthenticated(token);
+
+    req.user = response; // attach user id
     next();
   } catch (error) {
     throw new AppError(error.message, error.statusCode);

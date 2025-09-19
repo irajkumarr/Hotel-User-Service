@@ -9,7 +9,6 @@ const { TOKEN_QUEUE } = require("../queues/token-queue");
 const { Worker } = require("bullmq");
 const { UserService } = require("../services");
 
-
 const setupTokenJobWorker = () => {
   // Worker to process token-related jobs
   const tokenProcessor = new Worker(
