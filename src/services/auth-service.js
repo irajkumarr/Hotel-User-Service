@@ -3,7 +3,9 @@ const { UserRepository } = require("../repositories");
 const { AppError, FormatMessage } = require("../utils");
 const { Auth, Enums, CodeGenerator } = require("../utils/common");
 const { ServerConfig } = require("../config");
+const { addForgotPasswordEmailJob } = require("../producers/email-producer");
 const { ADMIN } = Enums.ROLE;
+const { NotificationDto } = require("../dto/notification-dto");
 
 const userRepository = new UserRepository();
 
@@ -37,6 +39,8 @@ async function createUser(data) {
       verificationToken: verificationToken,
       verificationTokenExpiry: verificationTokenExpiry,
     });
+    //send email
+
     return { message: "User registered. Please verify email." };
   } catch (error) {
     if (error instanceof AppError) {
@@ -230,8 +234,19 @@ async function forgotPassword(email) {
       lastTokenSentAt: new Date(),
     });
     //send email
+    const notificationPayload = NotificationDto({
+      to: user.email,
+      subject: "Reset Your Password",
+      templateId: "forgot-password",
+      params: {
+        name: user.firstName,
+        resetToken: code,
+      },
+    });
+    await addForgotPasswordEmailJob(notificationPayload);
     return { message: "Password reset code sent to email" };
   } catch (error) {
+    console.log(error);
     if (error instanceof AppError) throw error;
 
     throw new AppError(
