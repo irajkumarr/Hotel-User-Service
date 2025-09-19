@@ -14,6 +14,7 @@ const { createBullBoard } = require("@bull-board/api");
 const { BullMQAdapter } = require("@bull-board/api/bullMQAdapter");
 const { ExpressAdapter } = require("@bull-board/express");
 const { tokenQueue } = require("./queues/token-queue"); // your BullMQ queue
+const { mailerQueue } = require("./queues/mailer-queue"); // your BullMQ queue
 
 const app = express();
 
@@ -40,7 +41,7 @@ const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath("/admin/queues");
 
 createBullBoard({
-  queues: [new BullMQAdapter(tokenQueue)],
+  queues: [new BullMQAdapter(tokenQueue), new BullMQAdapter(mailerQueue)],
   serverAdapter,
 });
 
