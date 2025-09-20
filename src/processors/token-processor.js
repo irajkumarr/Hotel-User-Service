@@ -1,9 +1,9 @@
 const { Logger } = require("../config");
 const { redisConnection } = require("../config/redis-config");
 const {
-  VERIFICATION_TOKEN_PAYLOAD,
-  RESET_TOKEN_PAYLOAD,
-  UNVERIFIED_ACCOUNT_PAYLOAD,
+  VERIFICATION_TOKEN_JOB,
+  RESET_TOKEN_JOB,
+  UNVERIFIED_ACCOUNT_JOB,
 } = require("../producers/token-producer");
 const { TOKEN_QUEUE } = require("../queues/token-queue");
 const { Worker } = require("bullmq");
@@ -15,17 +15,17 @@ const setupTokenJobWorker = () => {
     TOKEN_QUEUE,
     async (job) => {
       switch (job.name) {
-        case VERIFICATION_TOKEN_PAYLOAD:
+        case VERIFICATION_TOKEN_JOB:
           const v = await UserService.clearExpiredVerificationToken();
           Logger.info(`✅ Cleared ${v.count} expired verification tokens`);
           break;
 
-        case RESET_TOKEN_PAYLOAD:
+        case RESET_TOKEN_JOB:
           const r = await UserService.clearExpiredResetToken();
           Logger.info(`✅ Cleared ${r.count} expired reset tokens`);
           break;
 
-        case UNVERIFIED_ACCOUNT_PAYLOAD:
+        case UNVERIFIED_ACCOUNT_JOB:
           const d = await UserService.deleteUnverifiedAccounts(
             job.data.expiryHours
           );
