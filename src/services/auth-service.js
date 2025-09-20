@@ -3,7 +3,10 @@ const { UserRepository } = require("../repositories");
 const { AppError, FormatMessage } = require("../utils");
 const { Auth, Enums, CodeGenerator } = require("../utils/common");
 const { ServerConfig } = require("../config");
-const { addForgotPasswordEmailJob } = require("../producers/email-producer");
+const {
+  addForgotPasswordEmailJob,
+  addVerificationEmailJob,
+} = require("../producers/email-producer");
 const { ADMIN } = Enums.ROLE;
 const { NotificationDto } = require("../dto/notification-dto");
 
@@ -32,7 +35,7 @@ async function createUser(data) {
 
     const verificationToken = CodeGenerator.generateCode();
     console.log(verificationToken);
-    const verificationTokenExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const verificationTokenExpiry = new Date(Date.now() + 10 * 60 * 1000); //10 min
 
     await userRepository.create({
       ...data,
@@ -40,6 +43,16 @@ async function createUser(data) {
       verificationTokenExpiry: verificationTokenExpiry,
     });
     //send email
+    const notificationPayload = NotificationDto({
+      to: data.email,
+      subject: "Verify your email",
+      templateId: "verify-email",
+      params: {
+        name: data.firstName,
+        verificationToken: verificationToken,
+      },
+    });
+    await addVerificationEmailJob(notificationPayload);
 
     return { message: "User registered. Please verify email." };
   } catch (error) {
@@ -226,7 +239,7 @@ async function forgotPassword(email) {
     const code = CodeGenerator.generateCode();
     console.log(code);
     const hashedToken = CodeGenerator.hashCode(code);
-    const resetPasswordExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const resetPasswordExpiry = new Date(Date.now() + 10 * 60 * 1000); //10 min
 
     await userRepository.update(user.id, {
       resetPasswordToken: hashedToken,
