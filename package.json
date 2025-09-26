@@ -15,7 +15,7 @@
     "@bull-board/express": "^6.12.7",
     "@prisma/client": "^6.16.2",
     "bcryptjs": "^3.0.2",
-    "bullmq": "^5.58.5",
+    "bullmq": "^5.58.9",
     "cloudinary": "^1.41.3",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -27,7 +27,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "node-cron": "^4.2.1",
-    "uuid": "^13.0.0",
+    "uuid": "^8.3.2",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
